@@ -1,39 +1,38 @@
 /* CONFIGURATION STARTS HERE */
-  
-  /* Step 1: enter your domain name like fruitionsite.com */
-  const MY_DOMAIN = "philipb.cc";
-  
-  /*
-   * Step 2: enter your URL slug to page ID mapping
-   * The key on the left is the slug (without the slash)
-   * The value on the right is the Notion page ID
-   */
-  const SLUG_TO_PAGE = {
-    "": "81da974703d24b9cad61368a57d933ec",
-    'notion': "375c976b575f466a9035148c2633b153",
-    'personality': "d9dd630d42fb49e3af3aca5a416fe53d",
-    'participation-consciente': "d92273eb90754330b435e682e8cfbb70",
-    'vision-facilitation': "406ca8a92f3c45dcad96c9894f74838f",
-    'outils': "9c275e97d0974b819795949fafe9587e",
-    'modules': "a2b9ffb40d0c4e4bb434ccdbb1962561",
-    'principes-achat': "ced7772aca1c493882156a4d59625d0e",
-    'inspirations-vivre-relies': "e8880a6736594cf2946c30b9656bf14e",
-    'restaurants': "b858442434fd43978373917e64c52181",
-    'formations-facilitation': "f2deb9a9ec7f4a98bebcf613acf5a53a",
-    'enneagram': "7265a9f832304147866e3ad39fb328e2",
-    'facilitation-graphique': "c7a16c0ebb8c4a88b2445f809d85f9e6",
-  };
-  
-  /* Step 3: enter your page title and description for SEO purposes */
-  const PAGE_TITLE = "Philip Boisvieux 🌳";
-  const PAGE_DESCRIPTION = "Facilitateur de coopération, communicant et artisan de communs";
-  
-  /* Step 4: enter a Google Font name, you can choose from https://fonts.google.com */
-  const GOOGLE_FONT = "Manrope";
-  
-  /* Step 5: enter any custom scripts you'd like */
-  const CUSTOM_SCRIPT = `
-  <!-- Matomo -->
+
+/* Step 1: enter your domain name like fruitionsite.com */
+const MY_DOMAIN = "philipb.cc";
+
+/*
+ * Step 2: enter your URL slug to page ID mapping
+ * The key on the left is the slug (without the slash)
+ * The value on the right is the Notion page ID
+ */
+const SLUG_TO_PAGE = {
+  "": "81da974703d24b9cad61368a57d933ec",
+  'notion': "375c976b575f466a9035148c2633b153",
+  'personality': "d9dd630d42fb49e3af3aca5a416fe53d",
+  'participation-consciente': "d92273eb90754330b435e682e8cfbb70",
+  'vision-facilitation': "406ca8a92f3c45dcad96c9894f74838f",
+  'outils': "9c275e97d0974b819795949fafe9587e",
+  'modules': "a2b9ffb40d0c4e4bb434ccdbb1962561",
+  'principes-achat': "ced7772aca1c493882156a4d59625d0e",
+  'inspirations-vivre-relies': "e8880a6736594cf2946c30b9656bf14e",
+  'restaurants': "b858442434fd43978373917e64c52181",
+  'formations-facilitation': "f2deb9a9ec7f4a98bebcf613acf5a53a",
+  'enneagram': "7265a9f832304147866e3ad39fb328e2",
+  'facilitation-graphique': "c7a16c0ebb8c4a88b2445f809d85f9e6",
+};
+
+/* Step 3: enter your page title and description for SEO purposes */
+const PAGE_TITLE = "Philip Boisvieux 🌳";
+const PAGE_DESCRIPTION = "Facilitateur de coopération, communicant et artisan de communs";
+
+/* Step 4: enter a Google Font name, you can choose from https://fonts.google.com */
+const GOOGLE_FONT = "Manrope";
+
+/* Step 5: enter any custom scripts you'd like */
+const CUSTOM_SCRIPT = `  <!-- Matomo -->
 <script>
   var _paq = window._paq = window._paq || [];
   /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
@@ -58,7 +57,7 @@
 
   gtag('config', 'G-C5TQP2PH64');
 </script>`;
-  
+
 /* CONFIGURATION ENDS HERE */
 
 const PAGE_TO_SLUG = {};
@@ -152,7 +151,16 @@ async function fetchAndApply(request) {
     response = new Response(response.body, response);
     response.headers.set("Access-Control-Allow-Origin", "*");
     return response;
-  } else if (slugs.indexOf(url.pathname.slice(1)) > -1) {
+  }else if (url.pathname.endsWith(".js")){
+    response = await fetch(url.toString());
+    let body = await response.text();
+    response = new Response(
+      body,
+      response
+    );
+    response.headers.set("Content-Type", "application/x-javascript");
+    return response;
+  }else if (slugs.indexOf(url.pathname.slice(1)) > -1) {
     const pageId = SLUG_TO_PAGE[url.pathname.slice(1)];
     return Response.redirect("https://" + MY_DOMAIN + "/" + pageId, 301);
   } else if (
@@ -245,6 +253,7 @@ class BodyRewriter {
     element.append(
       `<script>
       window.CONFIG.domainBaseUrl = 'https://${MY_DOMAIN}';
+      localStorage.__console = true;
       const SLUG_TO_PAGE = ${JSON.stringify(this.SLUG_TO_PAGE)};
       const PAGE_TO_SLUG = {};
       const slugs = [];
